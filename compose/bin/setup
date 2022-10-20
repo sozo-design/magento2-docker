@@ -1,9 +1,10 @@
 #!/bin/bash
-source ${PWD}/docker/config.env
-#clear
+source "${PWD}"/docker/config.env
+clear
 
 LOCAL_DOMAIN=${1:-magento.local}
 sed -i -e "s/{{LOCAL_DOMAIN}}/$LOCAL_DOMAIN/g" docker/config.env
+sed -i -e "s/{{LOCAL_DOMAINS}}/$LOCAL_DOMAIN/g" docker/config.env
 bin/stop
 
 echo "Start by setting the file permissions"

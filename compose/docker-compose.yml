@@ -1,7 +1,7 @@
 version: '2.1'
 services:
   db:
-    hostname: "db.${LOCAL_DOMAIN}"
+    hostname: "db.${APP_DOMAIN}"
     image: 'percona:5.7'
     environment:
       - "MYSQL_ROOT_PASSWORD=${DB_PASSWORD}"
@@ -22,10 +22,10 @@ services:
     networks:
       magento:
         aliases:
-          - "db.${LOCAL_DOMAIN}"
+          - "db.${APP_DOMAIN}"
 
   redis:
-    hostname: "redis.${LOCAL_DOMAIN}"
+    hostname: "redis.${APP_DOMAIN}"
     image: 'redis:5.0'
     volumes:
       - 'mymagento-magento-sync:/app:delegated'
@@ -41,10 +41,10 @@ services:
     networks:
       magento:
         aliases:
-          - "redis.${LOCAL_DOMAIN}"
+          - "redis.${APP_DOMAIN}"
 
   elasticsearch:
-    hostname: "elasticsearch.${LOCAL_DOMAIN}"
+    hostname: "elasticsearch.${APP_DOMAIN}"
     image: elasticsearch:7.17.3
     environment:
       - "discovery.type=single-node"
@@ -62,10 +62,10 @@ services:
     networks:
       magento:
         aliases:
-          - "elasticsearch.${LOCAL_DOMAIN}"
+          - "elasticsearch.${APP_DOMAIN}"
 
   fpm:
-    hostname: "fpm.${LOCAL_DOMAIN}"
+    hostname: "fpm.${APP_DOMAIN}"
     build:
       context: 'docker/PHP/'
       args:
@@ -85,13 +85,13 @@ services:
     networks:
       magento:
         aliases:
-          - "fpm.${LOCAL_DOMAIN}"
+          - "fpm.${APP_DOMAIN}"
     depends_on:
       db:
         condition: service_healthy
 
   #  cron:
-  #    hostname: "cron.${LOCAL_DOMAIN}"
+  #    hostname: "cron.${APP_DOMAIN}"
   #    build:
   #      context: 'docker/cron/'
   #      args:
@@ -106,20 +106,20 @@ services:
   #    networks:
   #      magento:
   #        aliases:
-  #          - "cron.${LOCAL_DOMAIN}"
+  #          - "cron.${APP_DOMAIN}"
   #    depends_on:
   #      db:
   #        condition: service_healthy
 
   web:
-    hostname: "web.${LOCAL_DOMAIN}"
+    hostname: "web.${APP_DOMAIN}"
     #image: 'magento/magento-cloud-docker-nginx:latest-1.1'
     build: 'docker/Web/'
     extends: generic
     volumes:
       - 'mymagento-magento-sync:/app:delegated'
     environment:
-      - "VIRTUAL_HOST=${LOCAL_DOMAIN}"
+      - "VIRTUAL_HOST=${APP_DOMAIN}"
       - VIRTUAL_PORT=80
       - UPSTREAM_HOST=web
       - UPSTREAM_PORT=80
@@ -141,7 +141,7 @@ services:
     networks:
       magento:
         aliases:
-          - "web.${LOCAL_DOMAIN}"
+          - "web.${APP_DOMAIN}"
     healthcheck:
       test: exit 0
       interval: 30s
@@ -152,7 +152,7 @@ services:
         condition: service_started
 
   tls:
-    hostname: "tls.${LOCAL_DOMAIN}"
+    hostname: "tls.${APP_DOMAIN}"
     build: 'docker/Tls/'
     extends: generic
     volumes:
@@ -160,7 +160,7 @@ services:
     networks:
       magento:
         aliases:
-          - "${LOCAL_DOMAIN}"
+          - "${APP_DOMAIN}"
     environment:
       - NGINX_WORKER_PROCESSES=1
       - NGINX_WORKER_CONNECTIONS=1024
@@ -177,12 +177,12 @@ services:
 #          condition: service_started
 
   #  varnish:
-  #    hostname: "varnish.${LOCAL_DOMAIN}"
+  #    hostname: "varnish.${APP_DOMAIN}"
   #    image: 'magento/magento-cloud-docker-varnish:6.2'
   #    networks:
   #      magento:
   #        aliases:
-  #          - "${LOCAL_DOMAIN}"
+  #          - "${APP_DOMAIN}"
   #    volumes:
   #      - './docker/Varnish/default.vcl:/etc/varnish/default.vcl'
   #    depends_on:
@@ -190,7 +190,7 @@ services:
   #        condition: service_healthy
 
   generic:
-    hostname: "generic.${LOCAL_DOMAIN}"
+    hostname: "generic.${APP_DOMAIN}"
 #    image: 'alpine:latest'
     build: 'docker/Generic/'
     env_file: ./docker/config.env
@@ -199,7 +199,7 @@ services:
       - 'PHP_EXTENSIONS=bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip sodium redis xsl blackfire'
 
   fpm_xdebug:
-    hostname: "fpm_xdebug.${LOCAL_DOMAIN}"
+    hostname: "fpm_xdebug.${APP_DOMAIN}"
     image: 'magento/magento-cloud-docker-php:7.2-fpm-1.2'
     extends: generic
     ports:
@@ -212,13 +212,13 @@ services:
     networks:
       magento:
         aliases:
-          - "fpm_xdebug.${LOCAL_DOMAIN}"
+          - "fpm_xdebug.${APP_DOMAIN}"
     depends_on:
       db:
         condition: service_started
 
   mailhog:
-    hostname: "mailhog.${LOCAL_DOMAIN}"
+    hostname: "mailhog.${APP_DOMAIN}"
     image: 'mailhog/mailhog:latest'
     ports:
       - '1025:1025'
@@ -226,7 +226,7 @@ services:
     networks:
       magento:
         aliases:
-          - "mailhog.${LOCAL_DOMAIN}"
+          - "mailhog.${APP_DOMAIN}"
 
 volumes:
   mymagento-magento-sync:

@@ -6,6 +6,7 @@ curl -s https://raw.githubusercontent.com/sozo-design/magento2-docker/master/lib
 # Move files to the correct locations
 chmod +x compose/bin/*
 mv compose/* ./
+mkdir -p magento
 rm -rf compose
 
 # Environments?
