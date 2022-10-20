@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Download the bin files
-source <(curl -s https://raw.githubusercontent.com/sozo-design/magento2-docker/master/lib/downloader) https://github.com/sozo-design/magento2-docker/compose
+curl -s https://raw.githubusercontent.com/sozo-design/magento2-docker/master/lib/downloader | bash -s https://github.com/sozo-design/magento2-docker/compose
 
 # Move files to the correct locations
 mv composer/* ./

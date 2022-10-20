@@ -15,24 +15,24 @@ fi
 
 url=$1
 has_branch=$(echo ${url} | grep /tree/ > /dev/null; echo $?)
-tokens=(${url//"/"/})
+tokens=(${url//"/"/ })
 tokens_len=$((${#tokens[@]} - 1))
 owner=${tokens[2]}
 repo=${tokens[3]}
 
 if [[ $has_branch -eq 0 ]]
 then
-  branch=${tokens[5]}
-  dir_path=${tokens[6]}
-  dir_path_start_idx="7"
+	branch=${tokens[5]}
+	dir_path=${tokens[6]}
+	dir_path_start_idx="7"
 else
-  dir_path=${tokens[4]}
-  dir_path_start_idx="5"
+	dir_path=${tokens[4]}
+	dir_path_start_idx="5"
 fi
 
 for ((i = ${dir_path_start_idx}; i <= ${tokens_len}; i++));
 do
-  dir_path="${dir_path}/${tokens[i]}"
+	dir_path="${dir_path}/${tokens[i]}"
 done
 
 # API Template "https://api.github.com/repos/${OWNER}/${REPO}/contents/${DIR_PATH}?ref=${BRANCH}"
@@ -78,6 +78,7 @@ then
 fi
 
 file_names=$(cat ${contents_file} | grep "\"name\":")
+echo "Files: ${file_names}"
 file_names=${file_names//"\"name\":"/}
 file_names=${file_names//"\""/}
 file_names=${file_names//","/}
@@ -88,6 +89,7 @@ paths=${paths//"\""/}
 paths=${paths//","/}
 paths=(${paths})
 download_urls=$(cat ${contents_file} | grep "\"download_url\":")
+echo "Download URLs: ${download_urls}"
 download_urls=${download_urls//"\"download_url\":"/}
 download_urls=${download_urls//"\""/}
 download_urls=${download_urls//","/}
@@ -101,6 +103,7 @@ do
 	f_name=${file_names[i]}
 	path=${repo}/${paths[i]}
 	download_url=${download_urls[i]}
+	echo "Download URL: ${download_url}"
 
 	if [[ "${#runners[@]}" -ge 10 ]];
 	then
@@ -124,7 +127,7 @@ do
 		mkdir -p $(dirname "${path}")
 		echo ${path}
 		#curl -s "${download_url}" > "${path}" &
-		echo "Downloading ${download_url} to ${path}"
+		echo "curl -s ${download_url} > ${path}"
 		runners+=($!)
 	fi
 done
