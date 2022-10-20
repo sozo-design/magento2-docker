@@ -21,9 +21,12 @@ docker compose --env-file=./docker/config.env --file docker-compose.yml up --det
 [ $? != 0 ] && echo "Failed to start Docker services" && exit
 
 bin/setup-composer-auth
-
+rm -rf magento/tmp
 bin/permissions
 
 bin/clinotty composer create-project --repository=https://repo.magento.com/ magento/project-"${EDITION}"-edition="${VERSION}" tmp/
+
+rsync -av magento/tmp/ magento/
+rm -rf magento/tmp
 
 bin/clinotty [ ! -f "./var/composer_home/auth.json" ] && bin/clinotty mkdir -p ./var/composer_home && bin/clinotty cp /var/www/.composer/auth.json ./var/composer_home/auth.json
