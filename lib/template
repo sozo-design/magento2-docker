@@ -9,4 +9,9 @@ mv compose/* ./
 mkdir -p magento
 rm -rf compose
 
-# Environments?
+# Environment files used later for linking into a container
+mkdir -p environments/docker/app/etc
+touch environments/docker/app/etc/env.php
+touch environments/docker/app/etc/config.php
+mkdir -p environments/docker/wp/
+touch environments/docker/wp/wp-config.php
