@@ -2,41 +2,18 @@
 
 source ${PWD}/.docker/config.env
 
-[ -z "$1" ] && echo "Please specify a domain (ex. clientname.localhost)" && exit
+[ -z "$1" ] && echo "Please specify a domain (ex. clientname.local)" && exit
 
-DOMAIN=$@
+# Generate certificate authority if not already setup
+if ! docker compose exec -T -u root tls cat /root/.local/share/mkcert/rootCA.pem | grep -q 'BEGIN CERTIFICATE'; then
+  bin/setup-ssl-ca
+fi
 
-# Generate the openssl.conf for the specified domain
-cat > ${PWD}/.docker/Tls/certs/openssl.conf << EOF
-[req]
-distinguished_name = req_distinguished_name
-req_extensions = req_ext
-prompt = no
-
-[req_distinguished_name]
-commonName = $DOMAIN
-
-[ req_ext ]
-subjectAltName = @alt_names
-
-[alt_names]
-DNS.1 = $DOMAIN
-EOF
-
-cat > ${PWD}/.docker/Tls/certs/v3.ext << EOF
-authorityKeyIdentifier=keyid,issuer
-basicConstraints=CA:FALSE
-keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
-subjectAltName = @alt_names
-[alt_names]
-DNS.1 = $DOMAIN
-EOF
-
-# Generate the csr
-openssl req -new -key ${PWD}/.docker/Tls/certs/magento.key -out ${PWD}/.docker/Tls/certs/magento.csr -config ${PWD}/.docker/Tls/certs/openssl.conf -subj "/C=GB/ST=Gloucestershire/L=Cheltenham/O=SOZO Design Ltd/OU=IT/CN=${DOMAIN}"
-
-echo "Fetch new certificate from the container."
-docker cp ${COMPOSE_PROJECT_NAME}_tls_1:/etc/nginx/ssl/magento.crt ${PWD}/.docker/Tls/certs/magento.crt
+# Generate the certificate for the specified domain
+docker compose exec -T -u root tls mkcert -key-file nginx.key -cert-file nginx.crt "$@"
+echo "Moving key and cert to /etc/nginx/certs/..."
+#docker compose exec -T -u root tls chown app:app nginx.key nginx.crt
+docker compose exec -T -u root tls mv nginx.key nginx.crt /etc/nginx/certs/
 
 # Restart nginx to apply the update
 echo "restarting containers to apply updates..."
