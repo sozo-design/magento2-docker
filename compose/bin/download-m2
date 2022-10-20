@@ -7,7 +7,7 @@ bin/stop
 
 VERSION_ROOT=$(echo "$VERSION" | cut -b 1-5 | sed -e 's/\.//g')
 
-if (( $(echo "$VERSION_ROOT < 244" | bc -1) ))
+if (( $(echo "$VERSION_ROOT < 244" | bc -l) ))
 then
   sed -i -e 's/8.1/7.4/g' docker/PHP/Dockerfile
 else

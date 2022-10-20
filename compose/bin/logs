@@ -2,4 +2,4 @@
 
 source ${PWD}/docker/config.env
 
-docker-compose --env-file=./docker/config.env --file docker-compose.yaml logs --follow "$@"
+docker-compose --env-file=./docker/config.env --file docker-compose.yml logs --follow "$@"

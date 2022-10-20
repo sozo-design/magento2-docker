@@ -10,6 +10,7 @@ EDITION=${3:-community}
 # Update env references
 sed -i -e "s/{{PROJECT_NAME}}/$VERSION/g" docker/config.env
 sed -i -e "s/{{LOCAL_DOMAIN}}/$DOMAIN/g" docker/config.env
+sed -i -e "s/{{LOCAL_DOMAINS}}/$DOMAIN/g" docker/config.env
 sed -i -e "s/{{PROJECT_NAME}}/$VERSION/g" DOCKER.md
 sed -i -e "s/{{LOCAL_DOMAIN}}/$DOMAIN/g" DOCKER.md
 
