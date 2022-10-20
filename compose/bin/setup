@@ -1,0 +1,85 @@
+#!/bin/bash
+source ${PWD}/.docker/config.env
+clear
+
+LOCAL_DOMAIN=${1:-magento.local}
+sed -i -e "s/{{LOCAL_DOMAIN}}/$LOCAL_DOMAIN/g" .docker/config.env
+bin/stop
+
+echo "Start by setting the file permissions"
+bin/permissions
+
+echo "Start the instance..."
+docker compose --env-file=./.docker/config.env --file docker-compose.yaml up --detach --remove-orphans "$@"
+[ $? != 0 ] && echo "Failed to start Docker services" && exit
+
+echo "Adding Magento modules to Composer allow-plugins directive..."
+bin/clinotty composer config --no-plugins allow-plugins.magento/magento-composer-installer true
+bin/clinotty composer config --no-plugins allow-plugins.magento/inventory-composer-installer true
+bin/clinotty composer config --no-plugins allow-plugins.laminas/laminas-dependency-plugin true
+
+# Need to copy in the auth.json from the local machine for repo access.
+bin/clinotty mkdir /var/www/.ssh
+bin/clinotty touch /var/www/.ssh/known_hosts
+docker cp ~/.composer/auth.json ${COMPOSE_PROJECT_NAME}_fpm_1:/var/www/.composer/auth.json
+
+echo "Waiting for connection to Elasticsearch..."
+bin/clinotty timeout $ES_HEALTHCHECK_TIMEOUT bash -c "
+    until curl --silent --output /dev/null http://$ES_HOST:$ES_PORT/_cat/health?h=st; do
+        printf '.'
+        sleep 2
+    done"
+[ $? != 0 ] && echo "Failed to connect to Elasticsearch" && exit
+
+echo "Run composer install. Press [ENTER] to continue."
+read -s < /dev/tty
+bin/composer install
+
+bin/clinotty bin/magento setup:install \
+  --db-host="$MYSQL_HOST" \
+  --db-name="$MYSQL_DATABASE" \
+  --db-user="$MYSQL_USER" \
+  --db-password="$MYSQL_PASSWORD" \
+  --base-url=https://"$DOMAIN"/ \
+  --base-url-secure=https://"$DOMAIN"/ \
+  --backend-frontname="$MAGENTO_ADMIN_FRONTNAME" \
+  --admin-firstname="$MAGENTO_ADMIN_FIRST_NAME" \
+  --admin-lastname="$MAGENTO_ADMIN_LAST_NAME" \
+  --admin-email="$MAGENTO_ADMIN_EMAIL" \
+  --admin-user="$MAGENTO_ADMIN_USER" \
+  --admin-password="$MAGENTO_ADMIN_PASSWORD" \
+  --language="$MAGENTO_LOCALE" \
+  --currency="$MAGENTO_CURRENCY" \
+  --timezone="$MAGENTO_TIMEZONE" \
+  --cache-backend=redis \
+  --cache-backend-redis-server=redis \
+  --cache-backend-redis-db=0 \
+  --page-cache=redis \
+  --page-cache-redis-server=redis \
+  --page-cache-redis-db=1 \
+  --session-save=redis \
+  --session-save-redis-host=redis \
+  --session-save-redis-log-level=4 \
+  --session-save-redis-db=2 \
+  --search-engine=elasticsearch7 \
+  --elasticsearch-host=$ES_HOST \
+  --elasticsearch-port=$ES_PORT \
+  --use-rewrites=1 \
+  --no-interaction
+
+echo "Run Magento setup commands. Press [ENTER] to continue."
+read -s < /dev/tty
+bin/n98-magerun setup:static-content:deploy -f
+bin/n98-magerun indexer:reindex
+bin/n98-magerun cache:flush
+
+echo "Fix bin/magento permissions"
+bin/permissions
+
+echo "Setting up url and generating SSL"
+bin/setupssl "${LOCAL_DOMAIN}"
+
+echo
+echo "Complete! Please visit ${LOCAL_DOMAIN} to view the site."
+google-chrome "${LOCAL_DOMAIN}"
+echo

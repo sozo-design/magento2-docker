@@ -1,0 +1,82 @@
+#!/bin/bash
+source ${PWD}/.docker/config.env
+IFS=', ' read -r -a live_domains <<< "$REMOTE_DOMAINS"
+IFS=', ' read -r -a local_domains <<< "$LOCAL_DOMAINS"
+clear
+
+DB_DOWNLOAD_DIR="${PWD}/magento/dev"
+bin/stop
+
+echo "Configuring the repository to work with Docker locally..."
+
+echo "Start by setting the file permissions"
+bin/permissions
+
+#if [[ -z "${SSH_HOST}" ]]; then
+  # Download imagery
+  bin/local-imagery-import
+#fi
+
+echo "Start the instance..."
+bin/start "$@" --build
+[ $? != 0 ] && echo "Failed to start Docker services" && exit
+
+# Need to copy in the auth.json from the local machine for repo access.
+bin/clinotty mkdir /var/www/.ssh
+bin/clinotty touch /var/www/.ssh/known_hosts
+docker cp ~/.composer/auth.json ${COMPOSE_PROJECT_NAME}_fpm_1:/var/www/.composer/auth.json
+
+echo "Run composer install. Press [ENTER] to continue."
+read -s < /dev/tty
+bin/composer install
+
+# This must run after Composer has finished.
+echo "Copying configuration files into place."
+
+bin/clinotty rm -f /app/app/etc/env.php && bin/clinotty cp /environments/docker/app/etc/env.php /app/app/etc/env.php
+bin/clinotty rm -f /app/app/etc/config.php && bin/clinotty cp /environments/docker/app/etc/config.php /app/app/etc/config.php
+bin/clinotty rm -f /app/wp/wp-config.php && bin/clinotty cp /environments/docker/wp/wp-config.php /app/wp/wp-config.php
+
+
+# Download DB
+#if [[ -z ${SSH_HOST} ]]; then
+  bin/local-db-download
+#fi
+
+# DB Check and prompt (if required)
+until [ -f ${DB_DOWNLOAD_DIR}/m2.sql ]; do
+  echo "${DB_DOWNLOAD_DIR}/m2.sql file is not present, please download from the server."
+  sleep 5
+  clear
+done
+
+until [ -f ${DB_DOWNLOAD_DIR}/wp.sql ]; do
+  echo "${DB_DOWNLOAD_DIR}/wp.sql file is not present, please download from the server."
+  sleep 5
+  clear
+done
+
+# Fix wp.sql date issue
+#if ! grep -q "# SOZO Added to standard dump" ${DB_DOWNLOAD_DIR}/wp.sql; then
+#  echo -e "# SOZO Added to standard dump\nSET SQL_MODE='ALLOW_INVALID_DATES';\nUSE $WPDB_DATABASE;\n# EO: Added\n\n$(cat ${DB_DOWNLOAD_DIR}/wp.sql)" > ${DB_DOWNLOAD_DIR}/wp.sql
+#fi
+bin/import-db
+
+echo "Run Magento setup commands. Press [ENTER] to continue."
+read -s < /dev/tty
+bin/n98-magerun setup:upgrade
+bin/n98-magerun setup:static-content:deploy -f -j4 en_GB en_US
+bin/n98-magerun indexer:reindex
+bin/n98-magerun cache:flush
+
+echo "Cleanup WordPress Themes"
+bin/wp theme enable fishpig
+bin/wp theme delete twentynineteen twentyseventeen twentytwenty twentytwentyone twentytwentytwo
+
+echo "Fix bin/magento permissions"
+bin/permissions
+
+echo
+echo "Complete! Please visit ${LOCAL_DOMAINS} to view the site."
+google-chrome ${LOCAL_DOMAINS}
+echo

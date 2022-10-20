@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# Download the bin files
+source downloader https://github.com/sozo-design/magento2-docker/compose
+
+# Move files to the correct locations
+mv composer/* ./
+mv composer/.docker ./
+
+# Environments?

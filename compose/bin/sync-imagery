@@ -1,0 +1,10 @@
+#!/bin/bash
+source ${PWD}/.docker/config.env
+
+echo "Re-Syncronise imagery from live. Press [ENTER] to continue."
+read -s < /dev/tty
+
+rsync --exclude="cache*/*" --recursive --partial --progress "${SSH_HOST}:${REMOTE_SITE_DIR}/deployment/shared/magento/pub/media" ./magento/pub/
+rsync --exclude="cache*/*" --recursive --partial --progress "${SSH_HOST}:${REMOTE_SITE_DIR}/deployment/shared/magento/wp/wp-content/uploads" ./magento/wp/wp-content/
+
+echo "Imagery syncronised!"

@@ -1,0 +1,46 @@
+#!/bin/bash
+
+source ${PWD}/.docker/config.env
+IFS=', ' read -r -a live_domains <<< "$REMOTE_DOMAINS"
+IFS=', ' read -r -a local_domains <<< "$LOCAL_DOMAINS"
+
+while true; do
+  echo -e "\n"
+  read -p "Import Magento database? [y/n] " yn
+
+  case $yn in
+    [Yy]* )
+      bin/n98-magerun db:import --drop-tables /app/dev/m2.sql \
+        && bin/n98-magerun setup:upgrade \
+        && bin/n98-magerun cache:flush
+      break;;
+    [Nn]* ) break;;
+    * ) echo "Please answer yes or no.";;
+  esac
+done
+
+while true; do
+  echo -e "\n"
+  read -p "Import WordPress database? [y/n] " yn
+
+  case $yn in
+    [Yy]* )
+      bin/wp db clean --yes
+      bin/wp db import /app/dev/wp.sql
+
+      len="${#live_domains[@]}"
+      if [ "$len" -gt 1 ]; then
+        multisite="--multisite"
+      else
+        multisite=""
+      fi
+
+      for (( i=0; i<$len; i++ )); do
+        echo -e "Replace ${live_domains[$i]} with ${local_domains[$i]}"
+        bin/wp search-replace '"${live_domains[$i]}"' '"${local_domains[$1]}"' --skip-columns=guid ${multisite}
+      done
+      break;;
+    [Nn]* ) break;;
+    * ) echo "Please answer yes or no.";;
+  esac
+done

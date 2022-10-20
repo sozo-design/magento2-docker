@@ -1,0 +1,26 @@
+#!/bin/bash
+set -o errexit
+
+source ${PWD}/.docker/config.env
+
+# Test Connection
+while true; do
+  echo -e "\n"
+  read -p "Re-Synchronise imagery from remote? [y/n] " yn
+
+  case $yn in
+    [Yy]* )
+      echo -e "Downloading imagery"
+      source=("/pub/media/" "/wp/wp-content/uploads/")
+      dest=("./magento/pub/media/" "./magento/wp/wp-content/uploads/")
+
+      for i in "${!source[@]}"; do
+          rsync --recursive --links --human-readable --partial --progress --compress --perms --exclude={'cache*','sozo_imagify/*'} -e "ssh" "$SSH_HOST:/opt/magento/magento2${source[$i]}" "${dest[$i]}"
+      done
+
+      bin/permissions
+      break;;
+    [Nn]* ) break;;
+    * ) echo "Please answer yes or no.";;
+  esac
+done

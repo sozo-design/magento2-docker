@@ -1,0 +1,31 @@
+#!/bin/bash
+set -o errexit
+
+source ${PWD}/.docker/config.env
+IFS=', ' read -r -a live_domains <<< "$REMOTE_DOMAINS"
+IFS=', ' read -r -a local_domains <<< "$LOCAL_DOMAINS"
+
+DOWNLOAD_PATH="${PWD}/magento/dev"
+
+echo "Download Magento Databases from remote."
+
+# Backup database
+ssh "$SSH_HOST" <<ENDSSH
+  cd /opt/magento/magento2
+  n98-magerun --quiet --no-interaction db:dump --no-tablespaces --compression="gzip" --strip="@log @sessions @trade @sales @idx @aggregated @temp @newrelic_reporting mageplaza_smtp_log amasty_geoip_block scconnector_google_feed_cl" --force /opt/magento/backups/latest-m2.sql.gz
+ENDSSH
+
+# Retrieve backup
+scp -C "${SSH_HOST}:/opt/magento/backups/latest-m2.sql.gz" "${DOWNLOAD_PATH}/m2.sql.gz"
+gunzip -f "${DOWNLOAD_PATH}/m2.sql.gz"
+
+
+echo "Update domains in Magento Database."
+# Domain replacement
+for i in "${!live_domains[@]}"; do
+  echo -e "Replace ${live_domains[$i]} with ${local_domains[$i]}"
+  sed -i.bak "s|www.${live_domains[$i]}|${local_domains[$i]}|g" "${DOWNLOAD_PATH}/m2.sql"
+  rm -f "${DOWNLOAD_PATH}/m2.sql.bak"
+  sed -i.bak "s|${live_domains[$i]}|${local_domains[$i]}|g" "${DOWNLOAD_PATH}/m2.sql"
+  rm -f "${DOWNLOAD_PATH}/m2.sql.bak"
+done

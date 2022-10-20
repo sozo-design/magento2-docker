@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -o errexit
+
+DOMAIN=${1:-magento.test}
+VERSION=${2:-2.4.5-p1}
+EDITION=${3:-community}
+
+curl -s https://raw.githubusercontent.com/sozo-design/magento2-docker/master/lib/template | bash
+
+# Update env references
+sed -i -e "s/{{PROJECT_NAME}}/$VERSION/g" .docker/config.env
+sed -i -e "s/{{LOCAL_DOMAIN}}/$DOMAIN/g" .docker/config.env
+sed -i -e "s/{{PROJECT_NAME}}/$VERSION/g" DOCKER.md
+sed -i -e "s/{{LOCAL_DOMAIN}}/$DOMAIN/g" DOCKER.md
+
+# &&'s are used below otherwise freshsetup script fails/errors after bin/download
+bin/download-m2 "${VERSION}" "${EDITION}" \
+  && bin/setup "${DOMAIN}"

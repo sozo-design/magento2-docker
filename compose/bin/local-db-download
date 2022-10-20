@@ -1,0 +1,17 @@
+#!/bin/bash
+set -o errexit
+
+while true; do
+  echo -e "\n"
+  read -p "Download remote databases? [y/n] " yn
+
+  case $yn in
+    [Yy]* )
+      bin/download-m2-db
+      bin/download-wp-db
+      break;;
+    [Nn]* ) break;;
+    * ) echo "Please answer yes or no.";;
+  esac
+done
+
