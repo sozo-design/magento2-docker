@@ -78,7 +78,6 @@ then
 fi
 
 file_names=$(cat ${contents_file} | grep "\"name\":")
-echo "Files: ${file_names}"
 file_names=${file_names//"\"name\":"/}
 file_names=${file_names//"\""/}
 file_names=${file_names//","/}
@@ -89,7 +88,6 @@ paths=${paths//"\""/}
 paths=${paths//","/}
 paths=(${paths})
 download_urls=$(cat ${contents_file} | grep "\"download_url\":")
-echo "Download URLs: ${download_urls}"
 download_urls=${download_urls//"\"download_url\":"/}
 download_urls=${download_urls//"\""/}
 download_urls=${download_urls//","/}
@@ -101,9 +99,9 @@ runners=()
 for ((i = 0; i < ${n_files}; i++));
 do
 	f_name=${file_names[i]}
-	path=${repo}/${paths[i]}
+	#path=${repo}/${paths[i]}
+	path=${paths[i]}
 	download_url=${download_urls[i]}
-	echo "Download URL: ${download_url}"
 
 	if [[ "${#runners[@]}" -ge 10 ]];
 	then
@@ -113,8 +111,8 @@ do
 
 	if [ "${download_url}" == "null" ];
 	then
-		mkdir -p "${path}"
-		$0 "${url}/${f_name}" "${auth_token}"
+#		mkdir -p "${path}"
+		curl -s https://raw.githubusercontent.com/sozo-design/magento2-docker/master/lib/downloader | bash -s "${url}/${f_name}" "${auth_token}"
 
 		if [[ "$?" -ne 0 ]]
 		then
@@ -125,9 +123,7 @@ do
 		continue;
 	else
 		mkdir -p $(dirname "${path}")
-		echo ${path}
-		#curl -s "${download_url}" > "${path}" &
-		echo "curl -s ${download_url} > ${path}"
+		curl -s "${download_url}" > "${path}" &
 		runners+=($!)
 	fi
 done
