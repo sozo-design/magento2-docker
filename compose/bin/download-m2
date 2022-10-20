@@ -26,7 +26,7 @@ bin/permissions
 
 bin/clinotty composer create-project --repository=https://repo.magento.com/ magento/project-"${EDITION}"-edition="${VERSION}" tmp/
 
-rsync -av magento/tmp/ magento/
+rsync -a --stats magento/tmp/ magento/
 rm -rf magento/tmp
 
 bin/clinotty [ ! -f "./var/composer_home/auth.json" ] && bin/clinotty mkdir -p ./var/composer_home && bin/clinotty cp /var/www/.composer/auth.json ./var/composer_home/auth.json
