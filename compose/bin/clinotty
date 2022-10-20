@@ -1,4 +1,4 @@
 #!/bin/bash
 [ -z "$1" ] && echo "Please specify a CLI command (ex. ls)" && exit
 # -T: Disable pseudo-tty allocation
-docker-compose --env-file=./.docker/config.env exec --user=www-data -T fpm "$@"
+docker-compose --env-file=./docker/config.env exec --user=www-data -T fpm "$@"

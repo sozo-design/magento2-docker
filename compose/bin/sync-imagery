@@ -1,5 +1,5 @@
 #!/bin/bash
-source ${PWD}/.docker/config.env
+source ${PWD}/docker/config.env
 
 echo "Re-Syncronise imagery from live. Press [ENTER] to continue."
 read -s < /dev/tty

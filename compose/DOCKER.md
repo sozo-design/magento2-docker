@@ -11,8 +11,8 @@ Host production
 
 ## Initializing the instance
 
-This project has a `.docker` folder with most of the configuration in. Before starting we need to check the
-[./.docker/config.env](./.docker/config.env) to make sure the details are set correctly for the client.
+This project has a `docker` folder with most of the configuration in. Before starting we need to check the
+[./docker/config.env](./docker/config.env) to make sure the details are set correctly for the client.
 
 This involves checking the `LOCAL_DOMAINS`, `REMOTE_DOMAINS` and `SSH_HOST`. `LOCAL_DOMAINS` and `REMOTE_DOMAINS` should
 have the same number of domains (if more than one they should be comma space separated eg. "domain.one, domain.two").

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "${PWD}/.docker/config.env"
+source "${PWD}/docker/config.env"
 IFS=', ' read -r -a local_domains <<< "$LOCAL_DOMAINS"
 export LOCAL_DOMAIN="${local_domains[0]}"
 

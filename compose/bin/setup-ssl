@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ${PWD}/.docker/config.env
+source ${PWD}/docker/config.env
 
 [ -z "$1" ] && echo "Please specify a domain (ex. clientname.local)" && exit
 

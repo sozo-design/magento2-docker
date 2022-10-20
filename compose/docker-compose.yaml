@@ -13,7 +13,7 @@ services:
     volumes:
       - 'mymagento-magento-sync:/app:delegated'
       - 'mymagento-magento-db:/var/lib/mysql'
-      - './.docker/DB/setup.sql:/docker-entrypoint-initdb.d/01-setup.sql'
+      - './docker/DB/setup.sql:/docker-entrypoint-initdb.d/01-setup.sql'
     healthcheck:
       test: 'mysqladmin ping -uroot -pmagento2 -h localhost'
       interval: 30s
@@ -67,7 +67,7 @@ services:
   fpm:
     hostname: "fpm.${LOCAL_DOMAIN}"
     build:
-      context: '.docker/PHP/'
+      context: 'docker/PHP/'
       args:
         USER_ID: ${USER_ID:-0}
         GROUP_ID: ${GROUP_ID:-0}
@@ -93,7 +93,7 @@ services:
   #  cron:
   #    hostname: "cron.${LOCAL_DOMAIN}"
   #    build:
-  #      context: '.docker/cron/'
+  #      context: 'docker/cron/'
   #      args:
   #        USER_ID: ${USER_ID:-0}
   #        GROUP_ID: ${GROUP_ID:-0}
@@ -114,7 +114,7 @@ services:
   web:
     hostname: "web.${LOCAL_DOMAIN}"
     #image: 'magento/magento-cloud-docker-nginx:latest-1.1'
-    build: '.docker/Web/'
+    build: 'docker/Web/'
     extends: generic
     volumes:
       - 'mymagento-magento-sync:/app:delegated'
@@ -153,7 +153,7 @@ services:
 
   tls:
     hostname: "tls.${LOCAL_DOMAIN}"
-    build: '.docker/Tls/'
+    build: 'docker/Tls/'
     extends: generic
     volumes:
       - 'mymagento-magento-sync:/app:delegated'
@@ -184,7 +184,7 @@ services:
   #        aliases:
   #          - "${LOCAL_DOMAIN}"
   #    volumes:
-  #      - './.docker/Varnish/default.vcl:/etc/varnish/default.vcl'
+  #      - './docker/Varnish/default.vcl:/etc/varnish/default.vcl'
   #    depends_on:
   #      web:
   #        condition: service_healthy
@@ -192,8 +192,8 @@ services:
   generic:
     hostname: "generic.${LOCAL_DOMAIN}"
 #    image: 'alpine:latest'
-    build: '.docker/Generic/'
-    env_file: ./.docker/config.env
+    build: 'docker/Generic/'
+    env_file: ./docker/config.env
     environment:
       - MAGENTO_RUN_MODE=developer
       - 'PHP_EXTENSIONS=bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip sodium redis xsl blackfire'
