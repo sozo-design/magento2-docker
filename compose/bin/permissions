@@ -6,7 +6,7 @@ read -s < /dev/tty
 sudo find magento -type f -exec chmod 2666 {} +
 sudo find magento -type d -exec chmod 2777 {} +
 sudo chown -R $USER:$GROUP ./magento
+sudo chmod +x ./magento/bin/magento
+sudo chmod +x ./magento/vendor/bin/*
 
-bin/clinotty chmod +x bin/magento
-bin/clinotty chmod +x vendor/bin/*
 echo "Permissions updated!"

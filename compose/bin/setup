@@ -76,6 +76,7 @@ read -s < /dev/tty
 bin/n98-magerun setup:static-content:deploy -f
 bin/n98-magerun indexer:reindex
 bin/n98-magerun cache:flush
+bin/n98-magerun maintenance:disable
 
 echo "Fix bin/magento permissions"
 bin/permissions
