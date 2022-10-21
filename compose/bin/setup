@@ -27,7 +27,7 @@ bin/clinotty composer config --no-plugins allow-plugins.laminas/laminas-dependen
 # Need to copy in the auth.json from the local machine for repo access.
 bin/clinotty mkdir /var/www/.ssh
 bin/clinotty touch /var/www/.ssh/known_hosts
-docker cp ~/.composer/auth.json ${COMPOSE_PROJECT_NAME}_fpm_1:/var/www/.composer/auth.json
+docker cp ~/.composer/auth.json "$(docker compose --env-file=./docker/config.env ps -q fpm|awk '{print $1}')":/var/www/.composer/auth.json
 
 echo "Waiting for connection to Elasticsearch..."
 bin/clinotty timeout $ES_HEALTHCHECK_TIMEOUT bash -c "
@@ -37,17 +37,15 @@ bin/clinotty timeout $ES_HEALTHCHECK_TIMEOUT bash -c "
     done"
 [ $? != 0 ] && echo "Failed to connect to Elasticsearch" && exit
 
-echo "Run composer install. Press [ENTER] to continue."
+echo "Run magento setup. Press [ENTER] to continue."
 read -s < /dev/tty
-bin/composer install
-
 bin/clinotty bin/magento setup:install \
-  --db-host="$MYSQL_HOST" \
-  --db-name="$MYSQL_DATABASE" \
-  --db-user="$MYSQL_USER" \
-  --db-password="$MYSQL_PASSWORD" \
-  --base-url=https://"$DOMAIN"/ \
-  --base-url-secure=https://"$DOMAIN"/ \
+  --db-host="$DB_HOST" \
+  --db-name="$DB_DATABASE" \
+  --db-user="$DB_USERNAME" \
+  --db-password="$DB_PASSWORD" \
+  --base-url=https://"$LOCAL_DOMAIN"/ \
+  --base-url-secure=https://"$LOCAL_DOMAIN"/ \
   --backend-frontname="$MAGENTO_ADMIN_FRONTNAME" \
   --admin-firstname="$MAGENTO_ADMIN_FIRST_NAME" \
   --admin-lastname="$MAGENTO_ADMIN_LAST_NAME" \

@@ -1,2 +1,2 @@
 #!/bin/bash
-docker-compose --env-file=./docker/config.env exec --user=www-data fpm composer "$@"
+docker compose --env-file=./docker/config.env exec --user=www-data fpm composer "$@"

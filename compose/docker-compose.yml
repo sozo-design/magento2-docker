@@ -15,7 +15,7 @@ services:
       - 'mymagento-magento-db:/var/lib/mysql'
       - './docker/DB/setup.sql:/docker-entrypoint-initdb.d/01-setup.sql'
     healthcheck:
-      test: 'mysqladmin ping -uroot -pmagento2 -h localhost'
+      test: 'mysqladmin ping -uroot -pmagento -h localhost'
       interval: 30s
       timeout: 30s
       retries: 3

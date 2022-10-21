@@ -15,6 +15,8 @@ ENV NGINX_WORKER_CONNECTIONS 1024
 
 COPY nginx/nginx.conf /etc/nginx/
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+RUN mkdir -p /etc/nginx/partials
+COPY nginx/nginx.wp.docker.conf /etc/nginx/partials/wp.docker.conf
 
 VOLUME ${MAGENTO_ROOT}
 
