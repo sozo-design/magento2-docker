@@ -2,7 +2,7 @@
 set -o errexit
 
 # Generate a new local CA "/root/.local/share/mkcert"
-docker compose --env-file=./docker/config.env exec -T -u root "$(docker compose --env-file=./docker/config.env ps -q tls|awk '{print $1}')" mkcert -install
+docker compose --env-file=./docker/config.env exec -T -u root tls mkcert -install
 
 docker cp "$(docker compose --env-file=./docker/config.env ps -q tls|awk '{print $1}')":/root/.local/share/mkcert/rootCA.pem .
 
