@@ -1,5 +1,5 @@
 #!/bin/bash
 
-source ${PWD}/docker/config.env
+source ${PWD}/bin/utils
 
 docker compose --env-file=./docker/config.env --file docker-compose.yml logs --follow "$@"

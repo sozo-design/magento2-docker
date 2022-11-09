@@ -1,2 +1,5 @@
 #!/bin/bash
-docker compose --env-file=./docker/config.env -f docker-compose.yml ps
+
+source ${PWD}/bin/utils
+
+docker compose --env-file=./docker/config.env -f docker-compose.yaml ps

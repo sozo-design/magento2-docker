@@ -1,0 +1,14 @@
+#!/bin/bash
+if ! bin/cliq ls /app/wp; then
+    echo "wp not installed, please  make sure it is installed."
+fi
+
+echo "Copying wp-config and installing theme"
+cp environments/docker/wp/wp-config.php magento/wp/wp-config.php
+bin/n98-magerun fishpig:wordpress:build-theme --install-path=/app/wp
+cp -r environments/global/wp/wp-content/themes/fishpig-child magento/wp/wp-content/themes/
+cp -r environments/global/wp/wp-content/mu-plugins magento/wp/wp-content/
+bin/wp theme enable  fishpig-child --activate
+bin/n98-magerun cache:flush
+
+echo "Done!"

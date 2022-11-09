@@ -1,7 +1,5 @@
 #!/bin/bash
-source ${PWD}/docker/config.env
-IFS=', ' read -r -a live_domains <<< "$REMOTE_DOMAINS"
-IFS=', ' read -r -a local_domains <<< "$LOCAL_DOMAINS"
+source ${PWD}/bin/utils
 clear
 
 DB_DOWNLOAD_DIR="${PWD}/magento/dev"

@@ -113,7 +113,6 @@ services:
 
   web:
     hostname: "web.${APP_DOMAIN}"
-    #image: 'magento/magento-cloud-docker-nginx:latest-1.1'
     build: 'docker/Web/'
     extends: generic
     volumes:
@@ -191,7 +190,6 @@ services:
 
   generic:
     hostname: "generic.${APP_DOMAIN}"
-#    image: 'alpine:latest'
     build: 'docker/Generic/'
     env_file: ./docker/config.env
     environment:
@@ -233,7 +231,6 @@ volumes:
     driver_opts:
       type: none
       device: ${PWD}/magento
-      #device: '${PWD}'
       o: bind
   mymagento-magento-db: {  }
 networks:

@@ -1,8 +1,6 @@
 #!/bin/bash
 
-source ${PWD}/docker/config.env
-IFS=', ' read -r -a live_domains <<< "$REMOTE_DOMAINS"
-IFS=', ' read -r -a local_domains <<< "$LOCAL_DOMAINS"
+source ${PWD}/bin/utils
 
 while true; do
   echo -e "\n"
@@ -30,7 +28,7 @@ while true; do
 
       len="${#live_domains[@]}"
       if [ "$len" -gt 1 ]; then
-        multisite="--multisite"
+        multisite="--network"
       else
         multisite=""
       fi

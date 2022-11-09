@@ -1,7 +1,7 @@
 #!/bin/bash
 set -o errexit
 
-source ${PWD}/docker/config.env
+source ${PWD}/bin/utils
 
 # Test Connection
 while true; do
