@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source ${PWD}/bin/utils
+IFS=', ' read -r -a live_domains <<< "$REMOTE_DOMAINS"
 
 while true; do
   echo -e "\n"
@@ -35,7 +36,7 @@ while true; do
 
       for (( i=0; i<$len; i++ )); do
         echo -e "Replace ${live_domains[$i]} with ${local_domains[$i]}"
-        bin/wp search-replace '"${live_domains[$i]}"' '"${local_domains[$1]}"' --skip-columns=guid ${multisite}
+        bin/wp search-replace '"${live_domains[$i]}"' '"${local_domains[$1]}"' --skip-columns=guid --all-tables ${multisite}
       done
       break;;
     [Nn]* ) break;;

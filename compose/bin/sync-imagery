@@ -3,7 +3,9 @@
 echo "Re-Syncronise imagery from live. Press [ENTER] to continue."
 read -s < /dev/tty
 
-rsync --exclude="cache*/*" --recursive --partial --progress "${SSH_HOST}:${REMOTE_SITE_DIR}/deployment/shared/magento/pub/media" ./magento/pub/
-rsync --exclude="cache*/*" --recursive --partial --progress "${SSH_HOST}:${REMOTE_SITE_DIR}/deployment/shared/magento/wp/wp-content/uploads" ./magento/wp/wp-content/
+REMOTE_SITE_DIR=${REMOTE_SITE_DIR:-/opt/magento}
+
+rsync --exclude={'cache*','sozo_imagify/*'} --compress --recursive --partial --progress "${SSH_HOST}:${REMOTE_SITE_DIR}/deployment/shared/magento/pub/media" ./magento/pub/
+rsync --exclude={'cache*','sozo_imagify/*'} --compress --recursive --partial --progress "${SSH_HOST}:${REMOTE_SITE_DIR}/deployment/shared/magento/wp/wp-content/uploads" ./magento/wp/wp-content/
 
 echo "Imagery syncronised!"

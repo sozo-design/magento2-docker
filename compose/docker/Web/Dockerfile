@@ -1,5 +1,5 @@
 FROM nginx:1.20.2
-MAINTAINER Clive Walkden <clive@sozodesign.co.uk>
+LABEL maintainer="Clive Walkden <clive@sozodesign.co.uk>"
 
 ENV UPLOAD_MAX_FILESIZE 64M
 ENV FPM_HOST fpm
