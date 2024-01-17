@@ -23,7 +23,21 @@ bin/setup-composer-auth
 rm -rf magento/tmp
 bin/permissions
 
-bin/clinotty composer create-project --repository=https://repo.magento.com/ magento/project-"${EDITION}"-edition="${VERSION}" tmp/
+echo "Setup Magento ${VERSION} ${EDITION}..."
+bin/clinotty composer create-project --repository=https://repo.magento.com/ --no-install magento/project-"${EDITION}"-edition="${VERSION}" tmp/
+bin/clinotty composer config --no-plugins allow-plugins.laminas/laminas-dependency-plugin true
+bin/clinotty composer config --no-plugins allow-plugins.magento/magento-composer-installer true
+bin/clinotty composer config --no-plugins allow-plugins.magento/inventory-composer-installer true
+bin/clinotty composer config --no-plugins allow-plugins.magento/magento-cloud-metapackage-installer true
+bin/clinotty composer config --no-plugins allow-plugins.magento/magento-cloud-component-installer true
+bin/clinotty composer config --no-plugins allow-plugins.magento/magento-cloud-patches true
+bin/clinotty composer config --no-plugins allow-plugins.magento/magento-cloud-docker true
+bin/clinotty composer config --no-plugins allow-plugins.magento/magento-cloud-configuration true
+bin/clinotty composer config --no-plugins allow-plugins.magento/magento-cloud-metapackage-installer true
+bin/clinotty composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+bin/clinotty composer config --no-plugins allow-plugins.magento/composer-dependency-version-audit-plugin true
+bin/clinotty composer config --no-plugins allow-plugins.magento/composer-root-update-plugin true
+bin/clinotty composer install
 
 rsync -a --stats magento/tmp/ magento/
 rm -rf magento/tmp
