@@ -7,6 +7,14 @@ sudo find magento -type f -exec chmod 2666 {} +
 sudo find magento -type d -exec chmod 2777 {} +
 sudo chown -R $USER:$GROUP ./magento
 
-bin/clinotty chmod +x bin/magento
-bin/clinotty chmod +x -R vendor/bin/
+if [ -f "magento/bin/magento" ]; then
+  echo "Fix bin/magento permissions"
+  bin/clinotty chmod +x bin/magento
+fi
+
+if [ -d "vendor/bin/" ]; then
+  echo "Fix vendor/bin/ permissions"
+  bin/clinotty chmod +x -R vendor/bin/
+fi
+
 echo "Permissions updated!"
