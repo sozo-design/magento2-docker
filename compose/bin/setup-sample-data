@@ -10,6 +10,7 @@ while true; do
   case $yn in
     [Yy]* )
       bin/magento sampledata:deploy
+      bin/magento setup:upgrade
       break;;
     [Nn]* ) break;;
     * ) echo "Please answer yes or no.";;

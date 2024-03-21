@@ -2,7 +2,13 @@
 
 source bin/utils
 
+if [ -n "$COMPOSER_HOME" ]; then
+  echo "Copying auth.json to /app/var/composer_home/auth.json..."
+  bin/cli cp /var/www/.composer/auth.json /app/var/composer_home/auth.json
+fi
+
 if [ -n "$GITHUB_SSH_PRIVATE_KEY_LOCATION" ]; then
+  echo "Copying GitHub SSH private key to /var/www/.ssh/id_rsa..."
   docker cp "$GITHUB_SSH_PRIVATE_KEY_LOCATION" "$(bin/docker-compose ps -q fpm|awk '{print $1}')":/var/www/.ssh/id_rsa
   bin/rootnotty chmod 600 /var/www/.ssh/id_rsa
   bin/rootnotty chown $USER_ID:$GROUP_ID /var/www/.ssh/id_rsa
