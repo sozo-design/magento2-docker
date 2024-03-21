@@ -55,8 +55,10 @@ auth_header="Authorization: token ${auth_token}"
 
 if [ "${auth_token}" = "" ];
 then
+	echo "No token provided. Using public access."
 	curl -s -H "${accept_header}" "${contents_url}" > ${contents_file}
 else
+	echo "Using token for access."
 	curl -s -H "${auth_header}" -H "${accept_header}" "${contents_url}" > ${contents_file}
 fi
 
