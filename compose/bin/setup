@@ -83,6 +83,8 @@ fi
 echo "Setup local domain"
 bin/setup-domain
 
+bin/setup-sample-data
+
 echo
 echo "Complete! Please visit ${LOCAL_DOMAIN} to view the site."
 google-chrome "${LOCAL_DOMAIN}"

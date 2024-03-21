@@ -1,0 +1,17 @@
+#!/bin/bash
+set -o errexit
+
+source bin/utils
+
+while true; do
+  echo -e "\n"
+  read -p "Install sample data? [y/n] " yn
+
+  case $yn in
+    [Yy]* )
+      bin/magento sampledata:deploy
+      break;;
+    [Nn]* ) break;;
+    * ) echo "Please answer yes or no.";;
+  esac
+done
