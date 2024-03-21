@@ -25,6 +25,10 @@ bin/permissions
 
 echo "Setup Magento ${VERSION} ${EDITION}..."
 bin/clinotty composer create-project --repository=https://repo.magento.com/ --no-install magento/project-"${EDITION}"-edition="${VERSION}" tmp/
+
+rsync -a --stats magento/tmp/ magento/
+rm -rf magento/tmp
+
 bin/clinotty composer config --no-plugins allow-plugins.laminas/laminas-dependency-plugin true
 bin/clinotty composer config --no-plugins allow-plugins.magento/magento-composer-installer true
 bin/clinotty composer config --no-plugins allow-plugins.magento/inventory-composer-installer true
@@ -38,8 +42,3 @@ bin/clinotty composer config --no-plugins allow-plugins.dealerdirect/phpcodesnif
 bin/clinotty composer config --no-plugins allow-plugins.magento/composer-dependency-version-audit-plugin true
 bin/clinotty composer config --no-plugins allow-plugins.magento/composer-root-update-plugin true
 bin/clinotty composer install
-
-rsync -a --stats magento/tmp/ magento/
-rm -rf magento/tmp
-
-bin/clinotty [ ! -f "./var/composer_home/auth.json" ] && bin/clinotty mkdir -p ./var/composer_home && bin/clinotty cp /var/www/.composer/auth.json ./var/composer_home/auth.json
