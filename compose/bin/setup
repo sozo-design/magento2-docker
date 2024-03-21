@@ -11,10 +11,6 @@ sed -i -e "s/{{LOCAL_DOMAINS}}/$LOCAL_DOMAIN/g" .docker/config.env
 echo "Start by setting the file permissions"
 bin/permissions
 
-echo "Start the instance..."
-bin/start "$@" --build
-[ $? != 0 ] && echo "Failed to start Docker services" && exit
-
 echo "Copy private key if exists"
 bin/setup-ssh
 

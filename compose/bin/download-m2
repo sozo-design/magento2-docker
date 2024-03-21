@@ -5,13 +5,14 @@ EDITION=${2:-community}
 
 source ${PWD}/bin/utils
 
-bin/stop
-
 VERSION_ROOT=$(echo "$VERSION" | cut -b 1-5 | sed -e 's/\.//g')
 
 if (( $(echo "$VERSION_ROOT < 244" | bc -l) ))
 then
   sed -i -e 's/8.1/7.4/g' .docker/PHP/Dockerfile
+elif (( $(echo "$VERSION_ROOT > 246" | bc -l) ))
+then
+  sed -i -e 's/8.1/8.2/g' .docker/PHP/Dockerfile
 else
   sed -i -e 's/7.4/8.1/g' .docker/PHP/Dockerfile
 fi
@@ -19,7 +20,6 @@ fi
 bin/docker-compose up --detach
 [ $? != 0 ] && echo "Failed to start Docker services" && exit
 
-bin/setup-composer-auth
 rm -rf magento/tmp
 bin/permissions
 
