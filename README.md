@@ -1,4 +1,4 @@
-# SOZO Magento Docker Compatibility v1.0.0
+# SOZO Magento Docker Compatibility v1.0.1
 
 This is used to create a local docker environment for module development and testing.
 
