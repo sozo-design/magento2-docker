@@ -13,7 +13,7 @@ COMPOSER_HOME=$(composer config --global --list | grep '\[home\]' | awk '{print 
 # Setup required information and save in the local.env file
 read -p "Enter your local composer home directory: " COMPOSER_HOME
 read -p "Enter your GitHub SSH Private Key location for composer: " GITHUB_SSH_PRIVATE_KEY
-{ cat 'docker/local.env.sample' } > ".docker/local.env"
+cat 'docker/local.env.sample' > ".docker/local.env"
 sed -ri -e 's!{{COMPOSER_HOME}}!'"$COMPOSER_HOME"'!' \
   -e 's!{{GITHUB_SSH_PRIVATE_KEY}}!'"$GITHUB_SSH_PRIVATE_KEY"'!' \
   ".docker/local.env"
