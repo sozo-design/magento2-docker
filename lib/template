@@ -6,6 +6,7 @@ curl -s https://raw.githubusercontent.com/sozo-design/magento2-docker/master/lib
 [ $? != 0 ] && echo "Failed to download repo data" && exit
 
 # Move files to the correct locations
+echo "Moving files into place..."
 chmod +x -R compose/bin/
 
 mv compose/bin ./bin
@@ -15,4 +16,6 @@ mv compose/environments ./environments
 mv compose/DOCKER.md ./DOCKER.md
 
 mkdir -p magento
+
+echo "Cleaning up..."
 rm -rf compose
