@@ -1,0 +1,9 @@
+#!/bin/bash
+
+source bin/utils
+
+if [ -n "$GITHUB_SSH_PRIVATE_KEY_LOCATION" ]; then
+  docker cp "$GITHUB_SSH_PRIVATE_KEY_LOCATION" "$(bin/docker-compose ps -q fpm|awk '{print $1}')":/var/www/.ssh/id_rsa
+  bin/rootnotty chmod 600 /var/www/.ssh/id_rsa
+  bin/rootnotty chown $USER_ID:$GROUP_ID /var/www/.ssh/id_rsa
+fi

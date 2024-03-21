@@ -1,0 +1,22 @@
+#!/bin/bash
+
+source bin/utils
+
+if [ $# -eq 0 ]; then
+    dump="/app/dev/m2.sql"
+else
+    dump="$1"
+fi
+
+if ! bin/clinotty test -f "${dump}"; then
+    echo "${dump} does not exist."
+    exit;
+fi
+
+echo "Importing Magento database: ${dump}"
+
+bin/n98-magerun db:import --drop-tables "${dump}" \
+        && bin/n98-magerun setup:upgrade \
+        && bin/n98-magerun cache:flush
+
+echo "Done!"

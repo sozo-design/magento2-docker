@@ -1,0 +1,11 @@
+#!/bin/bash
+
+source bin/utils
+
+echo -e "Installing Hyva Theme...\n"
+
+bin/docker-compose exec --workdir=${TAILWIND_DIR} --user=www-data fpm rm -rf node_modules
+
+bin/docker-compose exec --workdir=${TAILWIND_DIR} --user=www-data fpm npm install
+
+echo "Done! Run bin/compile-hyva build to compile the theme."

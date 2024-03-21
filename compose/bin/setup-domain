@@ -1,16 +1,25 @@
 #!/bin/bash
 set -o errexit
 
-[ -z "$1" ] && echo "Please specify a domain name (ex. clientname.test)" && exit
+source bin/utils
 
-DOMAIN=$1
+len="${#LOCAL_DOMAINS[@]}"
 
-echo "Your system password has been requested to ad an entry to /etc/hosts..."
-echo "127.0.0.1 ::1 $DOMAIN" | sudo tee -a /etc/hosts
+for (( i=0; i<$len; i++ )); do
+  hostentry="127.0.0.1 ::1 ${LOCAL_DOMAINS[$1]}"
 
-echo "Set https://${DOMAIN}/ to web/secure/base_url and web/unsecure/base_url"
-bin/clinotty bin/magento config:set web/secure/base_url https://"$DOMAIN"/
-bin/clinotty bin/magento config:set web/unsecure/base_url https://"$DOMAIN"/
+  if ! grep -q "$hostentry" /etc/hosts; then
+    echo "Your system password has been requested to add an entry to /etc/hosts..."
+    echo -e "\n$hostentry" | sudo tee -a /etc/hosts
+    echo "Added entry to /etc/hosts"
+  else
+    echo "Entry already exists in /etc/hosts"
+  fi
+done
+
+echo "Set https://${LOCAL_DOMAIN}/ to web/secure/base_url and web/unsecure/base_url"
+bin/clinotty bin/magento config:set web/secure/base_url https://"$LOCAL_DOMAIN"/
+bin/clinotty bin/magento config:set web/unsecure/base_url https://"$LOCAL_DOMAIN"/
 
 echo "Generating SSL certificate..."
-bin/setup-ssl "$DOMAIN"
+bin/setup-ssl "$LOCAL_DOMAIN"

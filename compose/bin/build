@@ -1,0 +1,5 @@
+#!/bin/bash
+
+source ${PWD}/bin/utils
+
+bin/docker-compose build --no-cache --progress=auto

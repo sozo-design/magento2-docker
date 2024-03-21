@@ -12,16 +12,3 @@ while true; do
     * ) echo "Please answer yes or no.";;
   esac
 done
-
-while true; do
-  echo -e "\n"
-  read -p "Export WordPress database? [y/n] " yn
-
-  case $yn in
-    [Yy]* )
-      bin/wp db export /app/dev/wp.sql
-      break;;
-    [Nn]* ) break;;
-    * ) echo "Please answer yes or no.";;
-  esac
-done

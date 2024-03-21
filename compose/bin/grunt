@@ -1,2 +1,6 @@
 #!/bin/bash
+
+# Delete pub/static to ensure that the theme is symlinked by Magento
+rm -rf pub/static
+
 bin/cli grunt "$@"

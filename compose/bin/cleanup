@@ -2,4 +2,8 @@
 
 source ${PWD}/bin/utils
 
-docker compose --env-file=./docker/config.env --file docker-compose.yml down --volumes "$@"
+bin/docker-compose down --volumes "$@"
+
+clear
+
+echo -e "All local docker containers and volumes have been removed.\n"

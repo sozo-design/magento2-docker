@@ -1,0 +1,23 @@
+#!/bin/bash
+
+source bin/utils
+
+ENV_FILES=(".docker/config.env")
+
+if [ -e "${PWD}/.docker/local.env" ]; then
+  ENV_FILES+=(".docker/local.env")
+fi
+
+COMPOSE_FILES=("docker-compose.yaml")
+
+ENV_FILES_PREFIXED=()
+for file in "${ENV_FILES[@]}"; do
+  ENV_FILES_PREFIXED+=("--env-file" "$file")
+done
+
+COMPOSE_FILES_PREFIXED=()
+for file in "${COMPOSE_FILES[@]}"; do
+  COMPOSE_FILES_PREFIXED+=("--file" "$file")
+done
+
+docker compose "${ENV_FILES_PREFIXED[@]}" "${COMPOSE_FILES_PREFIXED[@]}" "$@"

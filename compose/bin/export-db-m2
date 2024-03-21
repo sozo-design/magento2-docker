@@ -1,0 +1,3 @@
+#!/bin/bash
+
+bin/n98-magerun db:dump --no-tablespaces --git-friendly "$1"

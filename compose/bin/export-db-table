@@ -1,0 +1,3 @@
+#!/bin/bash
+[ -z "$1" ] && echo "Please specify a table to dump" && exit
+bin/n98-magerun db:dump --no-tablespaces --git-friendly --include "$1" /app/dev/$1.sql

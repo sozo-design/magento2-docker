@@ -1,6 +1,6 @@
 #!/bin/bash
+
 source ${PWD}/bin/utils
-clear
 
 DEFAULT_THEME_ID="select value from core_config_data where path = 'design/theme/theme_id'"
 THEME_PATH="select theme_path from theme where theme_id in ($DEFAULT_THEME_ID);"
@@ -36,5 +36,5 @@ bin/grunt exec:$THEME
 bin/grunt less:$THEME
 
 echo
-echo "Complete! Please visit use bin/grunt for frontend compilation."
+echo "Complete! Please use bin/grunt for frontend compilation."
 echo

@@ -7,13 +7,22 @@ echo "Setup!"
 LOCAL_DOMAIN=${1:-magento.local}
 sed -i -e "s/{{LOCAL_DOMAIN}}/$LOCAL_DOMAIN/g" docker/config.env
 sed -i -e "s/{{LOCAL_DOMAINS}}/$LOCAL_DOMAIN/g" docker/config.env
-bin/stop
+
+COMPOSER_HOME=$(composer config --global --list | grep '\[home\]' | awk '{print $2}')
+
+# Setup required information and save in the local.env file
+read -p "Enter your local composer home directory: " COMPOSER_HOME
+read -p "Enter your GitHub SSH Private Key location for composer: " GITHUB_SSH_PRIVATE_KEY
+{ cat "docker/local.env.sample" } > "docker/local.env"
+sed -ri -e 's!{{COMPOSER_HOME}}!'"$COMPOSER_HOME"'!' \
+  -e 's!{{GITHUB_SSH_PRIVATE_KEY}}!'"$GITHUB_SSH_PRIVATE_KEY"'!' \
+  "docker/local.env"
 
 echo "Start by setting the file permissions"
 bin/permissions
 
 echo "Start the instance..."
-docker compose --env-file=./docker/config.env --file docker-compose.yml up --detach --remove-orphans
+bin/start "$@" --build
 [ $? != 0 ] && echo "Failed to start Docker services" && exit
 
 echo "Adding Magento modules to Composer allow-plugins directive..."
@@ -21,10 +30,8 @@ bin/clinotty composer config --no-plugins allow-plugins.magento/magento-composer
 bin/clinotty composer config --no-plugins allow-plugins.magento/inventory-composer-installer true
 bin/clinotty composer config --no-plugins allow-plugins.laminas/laminas-dependency-plugin true
 
-# Need to copy in the auth.json from the local machine for repo access.
-bin/clinotty mkdir /var/www/.ssh
-bin/clinotty touch /var/www/.ssh/known_hosts
-docker cp ~/.composer/auth.json "$(docker compose --env-file=./docker/config.env ps -q fpm|awk '{print $1}')":/var/www/.composer/auth.json
+echo "Copy private key if exists"
+bin/setup-ssh
 
 echo "Waiting for connection to Elasticsearch..."
 bin/clinotty timeout $ES_HEALTHCHECK_TIMEOUT bash -c "
@@ -70,16 +77,30 @@ bin/clinotty bin/magento setup:install \
 
 echo "Run Magento setup commands. Press [ENTER] to continue."
 read -s < /dev/tty
-bin/n98-magerun setup:static-content:deploy -f
+
+echo "Run: magento setup:upgrade"
+bin/n98-magerun setup:upgrade
+bin/n98-magerun setup:static-content:deploy --force --jobs=4 en_GB en_US
+
+echo "Run: magento indexer:reindex"
 bin/n98-magerun indexer:reindex
+
+echo "Run: magento cache:flush"
 bin/n98-magerun cache:flush
-bin/n98-magerun maintenance:disable
 
-echo "Fix bin/magento permissions"
-bin/permissions
+if [ -z "${TAILWIND_DIR}" ]; then
+  echo "Compile Theme"
+  bin/setup-frontend
+else
+  echo "Setup Hyva"
+  bin/setup-hyva
 
-echo "Setting up url and generating SSL"
-bin/setup-ssl "${LOCAL_DOMAIN}"
+  echo "Compile Hyva"
+  bin/compile-hyva build
+fi
+
+echo "Setup local domain"
+bin/setup-domain
 
 echo
 echo "Complete! Please visit ${LOCAL_DOMAIN} to view the site."

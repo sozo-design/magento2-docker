@@ -6,6 +6,8 @@ VERSION=${2:-2.4.5-p1}
 EDITION=${3:-community}
 
 curl -s https://raw.githubusercontent.com/sozo-design/magento2-docker/master/lib/template | bash
+# local testing
+# ../lib/template | bash
 
 # Update env references
 sed -i -e "s/{{PROJECT_NAME}}/${VERSION//./}/g" docker/config.env
