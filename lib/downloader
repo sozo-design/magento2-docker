@@ -110,7 +110,7 @@ do
 
 	if [ "${download_url}" == "null" ];
 	then
-		curl -s https://raw.githubusercontent.com/sozo-design/magento2-docker/master/lib/downloader | bash -s "${url}/${f_name}" "${auth_token}"
+		curl -s https://raw.githubusercontent.com/sozo-design/magento2-docker/main/lib/downloader | bash -s "${url}/${f_name}" "${auth_token}"
 		# Local testing
 		#cat ~/git/magento2/magento-docker/lib/downloader | bash -s "${url}/${f_name}" "${auth_token}"
 

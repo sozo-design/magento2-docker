@@ -2,7 +2,7 @@
 
 # Download the bin files
 GITHUB_TOKEN=$(composer config --global --list | grep 'github-oauth' | awk '{print$2}')
-curl -s https://raw.githubusercontent.com/sozo-design/magento2-docker/master/lib/downloader | bash -s https://github.com/sozo-design/magento2-docker/compose $GITHUB_TOKEN
+curl -s https://raw.githubusercontent.com/sozo-design/magento2-docker/main/lib/downloader | bash -s https://github.com/sozo-design/magento2-docker/compose $GITHUB_TOKEN
 [ $? != 0 ] && echo "Failed to download repo data" && exit
 
 # Move files to the correct locations

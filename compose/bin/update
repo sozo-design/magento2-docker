@@ -1,7 +1,7 @@
 #!/bin/bash
 set -o errexit
 mkdir -p tmpupdate && cd "$_"
-curl -s https://raw.githubusercontent.com/sozo-design/magento2-docker/master/lib/template | bash
+curl -s https://raw.githubusercontent.com/sozo-design/magento2-docker/main/lib/template | bash
 rm -rf .git
 rm -rf environments
 rsync -a --stats --checksum ./ ../
