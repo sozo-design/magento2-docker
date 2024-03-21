@@ -78,7 +78,6 @@ services:
       - './dev/composerTidy.js:/dev/composerTidy.js'
       - './environments/docker/app/etc/config.php:/app/app/etc/config.php'
       - './environments/docker/app/etc/env.php:/app/app/etc/env.php'
-      - './environments/docker/wp/wp-config.php:/app/wp/wp-config.php'
     environment:
       - UPSTREAM_HOST=fpm
       - UPSTREAM_PORT=9000

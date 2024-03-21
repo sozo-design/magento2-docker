@@ -5,10 +5,12 @@ curl -s https://raw.githubusercontent.com/sozo-design/magento2-docker/master/lib
 
 # Move files to the correct locations
 chmod +x -R compose/bin/
-mv compose/* ./
+
+mv compose/bin ./bin
+mv compose/.docker ./.docker
+mv compose/docker-compose.yaml ./docker-compose.yaml
+mv compose/environments ./environments
+mv compose/DOCKER.md ./DOCKER.md
+
 mkdir -p magento
 rm -rf compose
-
-# Environment files used later for linking into a container
-mkdir -p environments/docker/wp/
-touch environments/docker/wp/wp-config.php

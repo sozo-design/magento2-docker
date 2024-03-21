@@ -5,18 +5,18 @@ source ${PWD}/bin/utils
 echo "Setup!"
 
 LOCAL_DOMAIN=${1:-magento.local}
-sed -i -e "s/{{LOCAL_DOMAIN}}/$LOCAL_DOMAIN/g" docker/config.env
-sed -i -e "s/{{LOCAL_DOMAINS}}/$LOCAL_DOMAIN/g" docker/config.env
+sed -i -e "s/{{LOCAL_DOMAIN}}/$LOCAL_DOMAIN/g" .docker/config.env
+sed -i -e "s/{{LOCAL_DOMAINS}}/$LOCAL_DOMAIN/g" .docker/config.env
 
 COMPOSER_HOME=$(composer config --global --list | grep '\[home\]' | awk '{print $2}')
 
 # Setup required information and save in the local.env file
 read -p "Enter your local composer home directory: " COMPOSER_HOME
 read -p "Enter your GitHub SSH Private Key location for composer: " GITHUB_SSH_PRIVATE_KEY
-{ cat "docker/local.env.sample" } > "docker/local.env"
+{ cat "docker/local.env.sample" } > ".docker/local.env"
 sed -ri -e 's!{{COMPOSER_HOME}}!'"$COMPOSER_HOME"'!' \
   -e 's!{{GITHUB_SSH_PRIVATE_KEY}}!'"$GITHUB_SSH_PRIVATE_KEY"'!' \
-  "docker/local.env"
+  ".docker/local.env"
 
 echo "Start by setting the file permissions"
 bin/permissions
