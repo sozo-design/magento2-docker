@@ -1,10 +1,32 @@
 version: '2.1'
 services:
+  cron:
+    hostname: "cron.${LOCAL_DOMAIN}"
+    build:
+      context: '.docker/cron/'
+      args:
+        USER_ID: ${USER_ID:-0}
+        GROUP_ID: ${GROUP_ID:-0}
+    extends: generic
+    volumes:
+      - 'mymagento-magento-sync:/app:delegated'
+      - './environments/docker/app/etc/config.php:/app/app/etc/config.php'
+      - './environments/docker/app/etc/env.php:/app/app/etc/env.php'
+    networks:
+      magento:
+        aliases:
+          - "cron.${LOCAL_DOMAIN}"
+    depends_on:
+      db:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+
   db:
     hostname: "db.${APP_DOMAIN}"
-    image: 'percona:5.7'
+    image: 'mysql:8.0'
     environment:
-      - "MYSQL_ROOT_PASSWORD=${DB_PASSWORD}"
+      - "MYSQL_ROOT_PASSWORD=magento2"
       - "MYSQL_DATABASE=${DB_DATABASE}"
       - "MYSQL_USER=${DB_USERNAME}"
       - "MYSQL_PASSWORD=${DB_PASSWORD}"
@@ -13,7 +35,8 @@ services:
     volumes:
       - 'mymagento-magento-sync:/app:delegated'
       - 'mymagento-magento-db:/var/lib/mysql'
-      - './docker/DB/setup.sql:/docker-entrypoint-initdb.d/01-setup.sql'
+      - './.docker/DB/setup.sql:/docker-entrypoint-initdb.d/01-setup.sql'
+      - './.docker/DB/config.cnf:/etc/mysql/conf.d/config.cnf'
     healthcheck:
       test: 'mysqladmin ping -uroot -pmagento -h localhost'
       interval: 30s
@@ -47,9 +70,11 @@ services:
     hostname: "elasticsearch.${APP_DOMAIN}"
     image: elasticsearch:7.17.3
     environment:
-      - "discovery.type=single-node"
-      - "bootstrap.memory_lock=true"
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - discovery.type=single-node
+      - cluster.routing.allocation.disk.threshold_enabled=false
+      - index.blocks.read_only_allow_delete
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
         soft: -1
@@ -67,17 +92,21 @@ services:
   fpm:
     hostname: "fpm.${APP_DOMAIN}"
     build:
-      context: 'docker/PHP/'
+      context: '.docker/PHP/'
       args:
         USER_ID: ${USER_ID:-0}
         GROUP_ID: ${GROUP_ID:-0}
     extends: generic
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - 'mymagento-magento-sync:/app:delegated'
-      - './environments:/environments'
-      - './dev/composerTidy.js:/dev/composerTidy.js'
-      - './environments/docker/app/etc/config.php:/app/app/etc/config.php'
-      - './environments/docker/app/etc/env.php:/app/app/etc/env.php'
+      - './environments:/environments:delegated'
+      - './dev/composerTidy.js:/dev/composerTidy.js:delegated'
+      - './environments/docker/app/etc/config.php:/app/app/etc/config.php:cached'
+      - './environments/docker/app/etc/env.php:/app/app/etc/env.php:cached'
+      - '~/.ssh/known_hosts:/var/www/.ssh/known_hosts:cached'
+      - "${COMPOSER_HOME}:/var/www/.composer:cached"
     environment:
       - UPSTREAM_HOST=fpm
       - UPSTREAM_PORT=9000
@@ -89,30 +118,9 @@ services:
       db:
         condition: service_healthy
 
-  #  cron:
-  #    hostname: "cron.${APP_DOMAIN}"
-  #    build:
-  #      context: 'docker/cron/'
-  #      args:
-  #        USER_ID: ${USER_ID:-0}
-  #        GROUP_ID: ${GROUP_ID:-0}
-  #    extends: generic
-  #    volumes:
-  #      - 'mymagento-magento-sync:/app:delegated'
-  #      - './environments/docker/app/etc/config.php:/app/app/etc/config.php'
-  #      - './environments/docker/app/etc/env.php:/app/app/etc/env.php'
-  #      - './environments/docker/wp/wp-config.php:/app/wp/wp-config.php'
-  #    networks:
-  #      magento:
-  #        aliases:
-  #          - "cron.${APP_DOMAIN}"
-  #    depends_on:
-  #      db:
-  #        condition: service_healthy
-
   web:
     hostname: "web.${APP_DOMAIN}"
-    build: 'docker/Web/'
+    build: '.docker/Web/'
     extends: generic
     volumes:
       - 'mymagento-magento-sync:/app:delegated'
@@ -151,7 +159,7 @@ services:
 
   tls:
     hostname: "tls.${APP_DOMAIN}"
-    build: 'docker/Tls/'
+    build: '.docker/Tls/'
     extends: generic
     volumes:
       - 'mymagento-magento-sync:/app:delegated'
@@ -182,41 +190,22 @@ services:
   #        aliases:
   #          - "${APP_DOMAIN}"
   #    volumes:
-  #      - './docker/Varnish/default.vcl:/etc/varnish/default.vcl'
+  #      - './.docker/Varnish/default.vcl:/etc/varnish/default.vcl'
   #    depends_on:
   #      web:
   #        condition: service_healthy
 
   generic:
     hostname: "generic.${APP_DOMAIN}"
-    build: 'docker/Generic/'
-    env_file: ./docker/config.env
+    build: '.docker/Generic/'
+    env_file: ./.docker/config.env
     environment:
       - MAGENTO_RUN_MODE=developer
       - 'PHP_EXTENSIONS=bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip sodium redis xsl blackfire'
 
-  fpm_xdebug:
-    hostname: "fpm_xdebug.${APP_DOMAIN}"
-    image: 'magento/magento-cloud-docker-php:7.2-fpm-1.2'
-    extends: generic
-    ports:
-      - '9001:9001'
-    volumes:
-      -  'mymagento-magento-sync:/app'
-    environment:
-      - 'PHP_EXTENSIONS=bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip redis xsl sodium xdebug'
-      - XDEBUG_CONFIG=remote_host=host.docker.internal remote_autostart=On remote_enable=On idekey=XDEBUG remote_log=/tmp/xdebug.log remote_port=9000
-    networks:
-      magento:
-        aliases:
-          - "fpm_xdebug.${APP_DOMAIN}"
-    depends_on:
-      db:
-        condition: service_started
-
   mailhog:
     hostname: "mailhog.${APP_DOMAIN}"
-    image: 'mailhog/mailhog:latest'
+    image: 'ghcr.io/sozo-design/magento2-mailhog:latest'
     ports:
       - '1025:1025'
       - '8025:8025'
@@ -225,6 +214,24 @@ services:
         aliases:
           - "mailhog.${APP_DOMAIN}"
 
+  rabbitmq:
+    hostname: "rabbitmq.${LOCAL_DOMAIN}"
+    image: 'rabbitmq:3.9-management-alpine'
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - mymagento-rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      magento:
+        aliases:
+          - "rabbitmq.${LOCAL_DOMAIN}"
+    healthcheck:
+      test: 'rabbitmq-diagnostics -q ping'
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
 volumes:
   mymagento-magento-sync:
     driver_opts:
@@ -232,6 +239,7 @@ volumes:
       device: ${PWD}/magento
       o: bind
   mymagento-magento-db: {  }
+  mymagento-rabbitmq-data: { }
 networks:
   magento:
     driver: bridge
