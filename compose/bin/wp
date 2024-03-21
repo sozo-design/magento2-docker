@@ -1,6 +1,0 @@
-#!/bin/bash
-if ! bin/cliq ls /usr/local/bin/wp; then
-    echo "wp cli not installed, please reinstall."
-fi
-
-bin/cli /usr/local/bin/wp --path=/app/wp --color "$@"

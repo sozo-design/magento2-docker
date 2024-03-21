@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ${PWD}/docker/config.env
+source ${PWD}/.docker/config.env
 
 export USER_ID=$(id -u)
 export GROUP_ID=$(id -g)
