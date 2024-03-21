@@ -1,15 +1,12 @@
 #!/bin/bash
 set -o errexit
 
-# Generate a new local CA "/root/.local/share/mkcert"
-docker compose --env-file=./docker/config.env exec -T -u root tls mkcert -install
-
-docker cp "$(docker compose --env-file=./docker/config.env ps -q tls|awk '{print $1}')":/root/.local/share/mkcert/rootCA.pem .
+docker cp "$(bin/docker-compose ps -q tls|awk '{print $1}')":/ca-certs/sozocacert.pem .
 
 echo "System password requested to install certificate authority on host..."
 
 if [ "$(uname)" == "Darwin" ]; then
-    sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain rootCA.pem
+    sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain sozocacert.pem
 
     # Check if Firefox is installed
     FFoxBin="/Application/Firefox.app/Contents/MacOS/firefox-bin"
@@ -31,9 +28,9 @@ if [ "$(uname)" == "Darwin" ]; then
         fi
 
         ### Move the newly created .pem to the Certificates directory
-        sudo mv rootCA.pem "$CertDirectory"/rootCA.pem
+        sudo mv sozocacert.pem "$CertDirectory"/sozocacert.pem
     else
-        sudo rm rootCA.pem
+        sudo rm sozocacert.pem
     fi
 
 else
@@ -48,7 +45,7 @@ else
     fi
 
     ### CA file to install (CUSTOMIZE!)
-    certfile="rootCA.pem"
+    certfile="sozocacert.pem"
     certname="SOZO CA"
 
     ### For cert8 (legacy - DBM)
@@ -67,7 +64,7 @@ else
         certutil -A -n "${certname}" -t "TCu,Cu,Tu" -i ${certfile} -d sql:"${certdir}"
     done
 
-    sudo mv rootCA.pem /usr/local/share/ca-certificates/sozocacert.crt
+    sudo mv sozocacert.pem /usr/local/share/ca-certificates/sozocacert.crt
     sudo update-ca-certificates
 
     if ($(awk -v cmd='openssl x509 -noout -subject' '/BEGIN/{close(cmd)};{print | cmd}' < /etc/ssl/certs/ca-certificates.crt | grep -q SOZO)); then

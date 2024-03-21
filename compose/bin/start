@@ -1,5 +1,5 @@
 #!/bin/bash
 
-source ${PWD}/bin/utils
+source bin/utils
 
-docker compose --env-file=./docker/config.env --file docker-compose.yml up --detach --remove-orphans "$@"
+bin/docker-compose up --detach --remove-orphans "$@"
