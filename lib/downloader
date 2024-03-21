@@ -6,8 +6,7 @@ then
 	exit
 fi
 
-GITHUB_TOKEN=$(composer config --global --list | grep 'github-oauth' | awk '{print$2}')
-auth_token="$GITHUB_TOKEN"
+auth_token=""
 
 if [[ $# -ge 2 ]];
 then
@@ -56,10 +55,8 @@ auth_header="Authorization: token ${auth_token}"
 
 if [ "${auth_token}" = "" ];
 then
-	echo "No token provided. Using public access."
 	curl -s -H "${accept_header}" "${contents_url}" > ${contents_file}
 else
-	echo "Using token for access."
 	curl -s -H "${auth_header}" -H "${accept_header}" "${contents_url}" > ${contents_file}
 fi
 
