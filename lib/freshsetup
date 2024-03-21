@@ -11,14 +11,8 @@ curl -s https://raw.githubusercontent.com/sozo-design/magento2-docker/master/lib
 
 
 COMPOSER_HOME=$(composer config --global --list | grep '\[home\]' | awk '{print $2}')
-
-# Setup required information and save in the local.env file
-read -p "Enter your local composer home directory: " COMPOSER_HOME
-read -p "Enter your GitHub SSH Private Key location for composer: " GITHUB_SSH_PRIVATE_KEY
 cat '.docker/local.env.sample' > ".docker/local.env"
-sed -i -e "s/{{COMPOSER_HOME}}/$COMPOSER_HOME/g" .docker/local.env
-sed -i -e "s/{{GITHUB_SSH_PRIVATE_KEY}}/$GITHUB_SSH_PRIVATE_KEY/g" .docker/local.env
-  
+sed -i -e "s/{{PATH_TO_COMPOSER}}/$COMPOSER_HOME/g" .docker/local.env
 
 # Update env references
 sed -i -e "s/{{PROJECT_NAME}}/${VERSION//./}/g" .docker/config.env
