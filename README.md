@@ -1,18 +1,13 @@
-# SOZO Magento Docker Compatibility
+# SOZO Magento Docker Compatibility v1.0.0
 
-This is used to create a local docker environment for project or module development.
-
-Local Testing
-`cat ~/git/magento2/magento-docker/lib/freshsetup | bash -s -- magento244-p2.test 2.4.4-p2`
+This is used to create a local docker environment for module development and testing.
 
 Usage
 
 ```shell
 # Create your project directory then go into it:
-mkdir -p ~/Sites/magento2.4.5-p1
+mkdir -p ~/Sites/magento2.4.6-p3
 cd $_
-
-GITHUB_TOKEN=$(composer config --global --list | grep 'github-oauth' | awk '{print$2}')
 
 # Run this automated one-liner from the directory you want to install your project.
 # Replace magento245-p1.test with the local domain you want to use
