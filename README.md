@@ -12,6 +12,8 @@ Usage
 mkdir -p ~/Sites/magento2.4.5-p1
 cd $_
 
+GITHUB_TOKEN=$(composer config --global --list | grep 'github-oauth' | awk '{print$2}')
+
 # Run this automated one-liner from the directory you want to install your project.
 # Replace magento245-p1.test with the local domain you want to use
 # Replace 2.4.5-p1 with the version of Magento you want to install
